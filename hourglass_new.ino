@@ -29,3 +29,22 @@ void is_valid(Adafruit_SSD1306 *display, int x, int y) {
   }
   return true;
 }
+
+void update_sand(Adafruit_SSD1306 *display, int x, int y) {
+  static int neighs[3][2] = {{0, 1}, {-1, 1}, {1, 1}};
+
+  if (!display.getPixel(x, y)) {
+    return;
+  }
+  for (int i = 0; i < 3; i++) {
+    int nx = x + neighs[i][0], ny = y + neighs[i][1];
+    if (!is_valid(display, nx, ny)) {
+      continue;
+    }
+    if (!display.getPixel(nx, ny)) {
+      display.drawPixel(nx, ny, true);
+      display.drawPixel(x, y, false);
+      return;
+    }
+  }
+}
