@@ -23,7 +23,7 @@ void loop() {
   delay(10);
 }
 
-void is_valid(Adafruit_SSD1306 *display, int x, int y) {
+bool is_valid(Adafruit_SSD1306 *display, int x, int y) {
   if (x < 0 || x >= display->width() || y < 0 || y >= display->height()) {
     return false;
   }
