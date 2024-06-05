@@ -9,13 +9,20 @@ Adafruit_SSD1306 display(128, 64, &Wire, -1);
 void setup() {
   // put your setup code here, to run once:
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+  display.setRotation(1);
   display.clearDisplay();
+
+  for (int y = 0; y < display.height(); y++) {
+    for (int x = 0; x < display.width(); x++) {
+      display.drawPixel(x, y, !is_valid(&display, x, y));
+    }
+  }
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
 
-  display.drawPixel(10, 10, true);
+  display.drawPixel(10, 11, true);
   update_sim(&display);
   
   display.display();
@@ -27,13 +34,20 @@ bool is_valid(Adafruit_SSD1306 *display, int x, int y) {
   if (x < 0 || x >= display->width() || y < 0 || y >= display->height()) {
     return false;
   }
-  return true;
+
+  int sub = x + 32 - y;
+  bool diag1 = (sub >= -1 && sub <= 1);
+  int add = x - 32 + y;
+  bool diag2 = (add >= 63 && add <= 65);
+
+  bool hole = (x == 32);
+  return (hole || (!diag1 && !diag2));
 }
 
 void update_sand(Adafruit_SSD1306 *display, int x, int y) {
   static int neighs[3][2] = {{0, 1}, {-1, 1}, {1, 1}};
 
-  if (!display->getPixel(x, y)) {
+  if (!is_valid(display, x, y) || !display->getPixel(x, y)) {
     return;
   }
   for (int i = 0; i < 3; i++) {
