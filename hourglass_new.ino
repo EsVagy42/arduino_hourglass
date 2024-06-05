@@ -12,17 +12,13 @@ void setup() {
   display.setRotation(1);
 
   draw_hourglass(&display);
+  fill_hourglass(&display, 60);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-
-  display.drawPixel(10, 11, true);
   update_sim(&display);
-  
   display.display();
-
-  delay(10);
 }
 
 bool is_valid(Adafruit_SSD1306 *display, int x, int y) {
@@ -52,6 +48,21 @@ void draw_hourglass(Adafruit_SSD1306 *display) {
       bool hole = (x == 32);
 
       display->drawPixel(x, y, (!hole && (diag1 || diag2)));
+    }
+  }
+}
+
+void fill_hourglass(Adafruit_SSD1306 *display, int sand_count) {
+  for (int y = 63; y >= 0; y--) {
+    for (int x = display->width(); x >= 0; x--) {
+      if (sand_count == 0) {
+        return;
+      }
+
+      if (is_valid(display, x, y)) {
+        display->drawPixel(x, y, true);
+        sand_count--;
+      }
     }
   }
 }
