@@ -10,13 +10,8 @@ void setup() {
   // put your setup code here, to run once:
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   display.setRotation(1);
-  display.clearDisplay();
 
-  for (int y = 0; y < display.height(); y++) {
-    for (int x = 0; x < display.width(); x++) {
-      display.drawPixel(x, y, !is_valid(&display, x, y));
-    }
-  }
+  draw_hourglass(&display);
 }
 
 void loop() {
@@ -36,12 +31,29 @@ bool is_valid(Adafruit_SSD1306 *display, int x, int y) {
   }
 
   int sub = x + 32 - y;
-  bool diag1 = (sub >= -1 && sub <= 1);
+  bool diag1 = (sub <= 0);
   int add = x - 32 + y;
-  bool diag2 = (add >= 63 && add <= 65);
+  bool diag2 = (add >= 64);
 
   bool hole = (x == 32);
-  return (hole || (!diag1 && !diag2));
+  return (hole || !(diag1 ^ diag2));
+}
+
+void draw_hourglass(Adafruit_SSD1306 *display) {
+  for (int y = 0; y < display->height(); y++) {
+    for (int x = 0; x < display->width(); x++) {
+      int x_diff = (y < 64 ? 33 : 31);
+      
+      int sub = x + x_diff - y;
+      bool diag1 = (sub == 0);
+      int add = x - x_diff + y;
+      bool diag2 = (add == 64);
+
+      bool hole = (x == 32);
+
+      display->drawPixel(x, y, (!hole && (diag1 || diag2)));
+    }
+  }
 }
 
 void update_sand(Adafruit_SSD1306 *display, int x, int y) {
