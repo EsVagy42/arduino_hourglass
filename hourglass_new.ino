@@ -33,7 +33,7 @@ void is_valid(Adafruit_SSD1306 *display, int x, int y) {
 void update_sand(Adafruit_SSD1306 *display, int x, int y) {
   static int neighs[3][2] = {{0, 1}, {-1, 1}, {1, 1}};
 
-  if (!display.getPixel(x, y)) {
+  if (!display->getPixel(x, y)) {
     return;
   }
   for (int i = 0; i < 3; i++) {
@@ -41,17 +41,17 @@ void update_sand(Adafruit_SSD1306 *display, int x, int y) {
     if (!is_valid(display, nx, ny)) {
       continue;
     }
-    if (!display.getPixel(nx, ny)) {
-      display.drawPixel(nx, ny, true);
-      display.drawPixel(x, y, false);
+    if (!display->getPixel(nx, ny)) {
+      display->drawPixel(nx, ny, true);
+      display->drawPixel(x, y, false);
       return;
     }
   }
 }
 
 void update_sim(Adafruit_SSD1306 *display) {
-  for (int y = display.height() - 1; y >= 0; y--) {
-    for (int x = display.width() - 1; x >= 0; x--) {
+  for (int y = display->height() - 1; y >= 0; y--) {
+    for (int x = display->width() - 1; x >= 0; x--) {
       update_sand(display, x, y);
     }
   }
