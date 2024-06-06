@@ -1,23 +1,26 @@
-#include <SPI.h>
-#include <Wire.h>
-#include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include "bitmaps.h"
 
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
-
 
 void setup() {
   // put your setup code here, to run once:
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   display.setRotation(1);
 
-  draw_hourglass(&display);
-  fill_hourglass(&display, 60);
+  // draw_hourglass(&display);
+  // fill_hourglass(&display, 60);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  update_sim(&display);
+  // update_sim(&display);
+  // display.display();
+  display.clearDisplay();
+  for (int y = 0; y < display.height(); y++) {
+    for (int x = 0; x < display.width(); x++) {
+      display.drawPixel(x, y, is_valid(&display, x, y));
+    }
+  }
   display.display();
 }
 
@@ -26,26 +29,13 @@ bool is_valid(Adafruit_SSD1306 *display, int x, int y) {
     return false;
   }
 
-  int sub = x + 32 - y;
-  bool diag1 = (sub <= 0);
-  int add = x - 32 + y;
-  bool diag2 = (add >= 64);
-
-  return !(diag1 ^ diag2);
+  int index = y * display->width() + x;
+  return !((bitmap_valid_pixels[index / 8] << (index % 8)) & 0x80);
 }
 
 void draw_hourglass(Adafruit_SSD1306 *display) {
-  for (int y = 0; y < display->height(); y++) {
-    for (int x = 0; x < display->width(); x++) {
-      int sub = x + 32 - y;
-      bool diag1 = (sub == 0);
-      int add = x - 32 + y;
-      bool diag2 = (add == 64);
-
-      int y_offset = (y <= display->height() / 2 ? 1 : -1);
-      display->drawPixel(x, y + y_offset, (diag1 || diag2));
-    }
-  }
+  display->clearDisplay();
+  display->drawBitmap(0, 0, bitmap_hourglass_texture, 64, 128, true);
 }
 
 void fill_hourglass(Adafruit_SSD1306 *display, int sand_count) {
