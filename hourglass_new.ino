@@ -4,23 +4,15 @@
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
 
 void setup() {
-  // put your setup code here, to run once:
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   display.setRotation(1);
 
-  // draw_hourglass(&display);
-  // fill_hourglass(&display, 60);
+  draw_hourglass(&display);
+  fill_hourglass(&display, 60);
 }
 
 void loop() {
-  // update_sim(&display);
-  // display.display();
-  display.clearDisplay();
-  for (int y = 0; y < display.height(); y++) {
-    for (int x = 0; x < display.width(); x++) {
-      display.drawPixel(x, y, is_valid(&display, x, y));
-    }
-  }
+  update_sim(&display);
   display.display();
 }
 
@@ -30,7 +22,7 @@ bool is_valid(Adafruit_SSD1306 *display, int x, int y) {
   }
 
   int index = y * display->width() + x;
-  return !((bitmap_valid_pixels[index / 8] << (index % 8)) & 0x80);
+  return !((pgm_read_byte(&(bitmap_valid_pixels[index / 8])) << (index % 8)) & 0x80);
 }
 
 void draw_hourglass(Adafruit_SSD1306 *display) {
