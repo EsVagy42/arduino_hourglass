@@ -29,25 +29,21 @@ bool is_valid(Adafruit_SSD1306 *display, int x, int y) {
   int sub = x + 32 - y;
   bool diag1 = (sub <= 0);
   int add = x - 32 + y;
-  bool diag2 = (add >= 63);
+  bool diag2 = (add >= 64);
 
-  bool hole = (x == 32);
-  return (hole || !(diag1 ^ diag2));
+  return !(diag1 ^ diag2);
 }
 
 void draw_hourglass(Adafruit_SSD1306 *display) {
   for (int y = 0; y < display->height(); y++) {
     for (int x = 0; x < display->width(); x++) {
-      int x_diff = (y < 64 ? 33 : 31);
-      
-      int sub = x + x_diff - y;
+      int sub = x + 32 - y;
       bool diag1 = (sub == 0);
-      int add = x - x_diff + y;
-      bool diag2 = (add == 63);
+      int add = x - 32 + y;
+      bool diag2 = (add == 64);
 
-      bool hole = (x == 32);
-
-      display->drawPixel(x, y, (!hole && (diag1 || diag2)));
+      int y_offset = (y <= display->height() / 2 ? 1 : -1);
+      display->drawPixel(x, y + y_offset, (diag1 || diag2));
     }
   }
 }
