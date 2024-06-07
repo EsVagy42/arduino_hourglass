@@ -43,8 +43,8 @@ void update_timer(Timer *timer) {
   timer->time_remaining -= delta_time;
   timer->sand_timer += delta_time;
 
-  unsigned long change = timer->sand_timer / SAND_TIME;
-  timer->sand_let_through -= change;
+  int change = timer->sand_timer / SAND_TIME;
+  timer->sand_let_through += change;
   timer->sand_timer -= SAND_TIME * change;
 
   timer->last_updated = elapsed;
