@@ -3,6 +3,15 @@
 
 #define SAND_TIME 2000
 
+#define MINUTES_DIGIT_POS_X 4
+#define MINUTES_DIGIT_POS_Y 60
+#define MINUTES_DIGIT_WIDTH 16
+#define MINUTES_DIGIT_HEIGHT 8
+#define SECONDS_DIGIT_POS_X 44
+#define SECONDS_DIGIT_POS_Y 60
+#define SECONDS_DIGIT_WIDTH 16
+#define SECONDS_DIGIT_HEIGHT 8
+
 #define swap(a, b) (a ^= b ^= a ^= b)
 
 int opening_pos[4][2] = {
@@ -22,9 +31,9 @@ typedef struct {
 } Timer;
 
 void create_timer(Timer *timer, int seconds) {
-  timer->time_remaining = seconds * 1000;
+  timer->time_remaining = (unsigned long)seconds * 1000;
   timer->last_updated = millis();
-  timer->sand_timer = 0;
+  timer->sand_timer = SAND_TIME;
   timer->sand_let_through = 0;
 }
 
@@ -48,10 +57,12 @@ void setup() {
 
   draw_hourglass(&display);
   start_timer(&display, &timer, 60);
+  display.setTextColor(true);
 }
 
 void loop() {
   update_sim(&display, &timer);
+  draw_remaining_time(&display, &timer);
   display.display();
 
   update_timer(&timer);
@@ -153,4 +164,15 @@ bool is_opening_open(Adafruit_SSD1306 *display, Timer *timer) {
   }
 
   return false;
+}
+
+bool draw_remaining_time(Adafruit_SSD1306 *display, Timer *timer) {
+  display->fillRect(MINUTES_DIGIT_POS_X, MINUTES_DIGIT_POS_Y, MINUTES_DIGIT_WIDTH, MINUTES_DIGIT_HEIGHT, false);
+  display->fillRect(SECONDS_DIGIT_POS_X, SECONDS_DIGIT_POS_Y, SECONDS_DIGIT_WIDTH, SECONDS_DIGIT_HEIGHT, false);
+
+  long time_remaining = abs((long)timer->time_remaining / 1000L);
+  display->setCursor(MINUTES_DIGIT_POS_X, MINUTES_DIGIT_POS_Y);
+  display->print((int)(time_remaining / 60L));
+  display->setCursor(SECONDS_DIGIT_POS_X, SECONDS_DIGIT_POS_Y);
+  display->print((int)(time_remaining % 60L));
 }
