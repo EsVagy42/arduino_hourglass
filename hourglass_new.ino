@@ -95,7 +95,10 @@ void fill_hourglass(Adafruit_SSD1306 *display, int sand_count) {
 }
 
 void update_sand(Adafruit_SSD1306 *display, int x, int y, int rotation) {
-  static int neighs[4][3][2] = {{{0, 1}, {-1, 1}, {1, 1}}, {{1, 0}, {1, 1}, {1, -1}}, {{0, -1}, {1, -1}, {-1, -1}}, {{-1, 0}, {-1, -1}, {-1, 1}}};
+  static int neighs[4][3][2] = {{{0, 1}, {-1, 1}, {1, 1}},
+                                {{1, 0}, {1, 1}, {1, -1}},
+                                {{0, -1}, {1, -1}, {-1, -1}},
+                                {{-1, 0}, {-1, -1}, {-1, 1}}};
 
   if (!is_valid(display, x, y) || !display->getPixel(x, y)) {
     return;
@@ -132,8 +135,7 @@ void start_timer(Adafruit_SSD1306 *display, Timer *timer, int seconds) {
 }
 
 bool is_opening_open(Adafruit_SSD1306 *display, Timer *timer) {
-  bool opening_pixel =
-      display->getPixel(opening_pos[0], opening_pos[1]);
+  bool opening_pixel = display->getPixel(opening_pos[0], opening_pos[1]);
   if (!opening_pixel) {
     return true;
   }
@@ -147,8 +149,10 @@ bool is_opening_open(Adafruit_SSD1306 *display, Timer *timer) {
 }
 
 bool draw_remaining_time(Adafruit_SSD1306 *display, Timer *timer) {
-  display->fillRect(MINUTES_DIGIT_POS_X, MINUTES_DIGIT_POS_Y, MINUTES_DIGIT_WIDTH, MINUTES_DIGIT_HEIGHT, false);
-  display->fillRect(SECONDS_DIGIT_POS_X, SECONDS_DIGIT_POS_Y, SECONDS_DIGIT_WIDTH, SECONDS_DIGIT_HEIGHT, false);
+  display->fillRect(MINUTES_DIGIT_POS_X, MINUTES_DIGIT_POS_Y,
+                    MINUTES_DIGIT_WIDTH, MINUTES_DIGIT_HEIGHT, false);
+  display->fillRect(SECONDS_DIGIT_POS_X, SECONDS_DIGIT_POS_Y,
+                    SECONDS_DIGIT_WIDTH, SECONDS_DIGIT_HEIGHT, false);
 
   long time_remaining = abs((long)timer->time_remaining / 1000L);
   display->setCursor(MINUTES_DIGIT_POS_X, MINUTES_DIGIT_POS_Y);
