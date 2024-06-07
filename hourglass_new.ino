@@ -1,9 +1,11 @@
-#include <Adafruit_SSD1306.h>
 #include "bitmaps.h"
+#include <Adafruit_SSD1306.h>
+
+#define swap(a, b) (a ^= b ^= a ^= b)
 
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
 
-int timer = 150;
+int timer = 100;
 
 void setup() {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
@@ -17,8 +19,8 @@ void loop() {
   update_sim(&display);
   display.display();
   if (!timer--) {
-    timer = 150;
-    display.setRotation(display.getRotation() + 2);
+    timer = 100;
+    display.setRotation(display.getRotation() + 1);
   }
 }
 
@@ -27,12 +29,19 @@ bool is_valid(Adafruit_SSD1306 *display, int x, int y) {
     return false;
   }
 
+  int width = display->width();
+  int height = display->height();
   if (display->getRotation() / 2) {
     x = display->width() - x - 1;
   }
+  if (!(display->getRotation() % 2)) {
+    swap(x, y);
+    swap(width, height);
+  }
 
-  int index = y * display->width() + x;
-  return !((pgm_read_byte(&(bitmap_valid_pixels[index / 8])) << (index % 8)) & 0x80);
+  int index = y * width + x;
+  return !((pgm_read_byte(&(bitmap_valid_pixels[index / 8])) << (index % 8)) &
+           0x80);
 }
 
 void draw_hourglass(Adafruit_SSD1306 *display) {
