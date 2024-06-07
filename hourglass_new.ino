@@ -5,6 +5,13 @@
 
 #define swap(a, b) (a ^= b ^= a ^= b)
 
+int opening_pos[4][2] = {
+    {63, 31},
+    {32, 63},
+    {63, 32},
+    {31, 63},
+};
+
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
 
 typedef struct {
@@ -23,12 +30,15 @@ void create_timer(Timer *timer, int seconds) {
 
 void update_timer(Timer *timer) {
   unsigned long elapsed = millis();
-  timer->last_updated = elapsed;
-  timer->time_remaining -= elapsed;
-  timer->sand_timer += elapsed;
+  int delta_time = elapsed - timer->last_updated;
+  timer->time_remaining -= delta_time;
+  timer->sand_timer += delta_time;
   if (timer->sand_timer >= SAND_TIME) {
     timer->sand_let_through++;
+    timer->sand_timer = 0;
   }
+
+  timer->last_updated = elapsed;
 }
 
 Timer timer;
@@ -41,9 +51,9 @@ void setup() {
 }
 
 void loop() {
-  update_sim(&display);
+  update_sim(&display, &timer);
   display.display();
-  
+
   update_timer(&timer);
 }
 
@@ -106,10 +116,16 @@ void update_sand(Adafruit_SSD1306 *display, int x, int y) {
   }
 }
 
-void update_sim(Adafruit_SSD1306 *display) {
+void update_sim(Adafruit_SSD1306 *display, Timer *timer) {
+  int rotation = display->getRotation();
+  int opening_x = opening_pos[rotation][0],
+      opening_y = opening_pos[rotation][1];
   for (int y = display->height() - 1; y >= 0; y--) {
     for (int x = display->width() - 1; x >= 0; x--) {
-      update_sand(display, x, y);
+      if (!(x == opening_x && y == opening_y) ||
+          is_opening_open(display, timer)) {
+        update_sand(display, x, y);
+      }
     }
   }
 }
@@ -120,5 +136,21 @@ void start_timer(Adafruit_SSD1306 *display, Timer *timer, int seconds) {
   draw_hourglass(display);
 
   create_timer(timer, seconds);
-  fill_hourglass(display, seconds * (SAND_TIME / 1000));
+  fill_hourglass(display, seconds / (SAND_TIME / 1000));
+}
+
+bool is_opening_open(Adafruit_SSD1306 *display, Timer *timer) {
+  int rotation = display->getRotation();
+  bool opening_pixel =
+      display->getPixel(opening_pos[rotation][0], opening_pos[rotation][1]);
+  if (!opening_pixel) {
+    return true;
+  }
+
+  if (timer->sand_let_through) {
+    timer->sand_let_through--;
+    return true;
+  }
+
+  return false;
 }
