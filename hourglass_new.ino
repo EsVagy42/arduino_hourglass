@@ -47,17 +47,24 @@ void update_timer(Timer *timer) {
 
 Timer timer;
 
+int random_update_pos[64];
+
 void setup() {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
 
   display.setRotation(1);
   draw_hourglass(&display);
   display.setTextColor(true);
-  start_timer(&display, &timer, 60);
+  start_timer(&display, &timer, 60 * 60);
+
+  for (int i = 0; i < 64; i++) {
+    random_update_pos[i] = i;
+  }
 }
 
 void loop() {
-  update_sim(&display, &timer, 0);
+  randomize_updates(random_update_pos);
+  update_sim(&display, &timer, 0, random_update_pos);
   draw_remaining_time(&display, &timer);
   display.display();
 
@@ -116,14 +123,24 @@ void update_sand(Adafruit_SSD1306 *display, int x, int y, int rotation) {
   }
 }
 
-void update_sim(Adafruit_SSD1306 *display, Timer *timer, int rotation) {
+void update_sim(Adafruit_SSD1306 *display, Timer *timer, int rotation,
+                int *random_pos) {
   for (int y = display->height() - 1; y >= 0; y--) {
-    for (int x = display->width() - 1; x >= 0; x--) {
-      if (!(x == opening_pos[0] && y == opening_pos[1]) ||
-          is_opening_open(display, timer)) {
-        update_sand(display, x, y, rotation);
+    for (int *x = random_pos; x < random_pos + 64; x++) {
+      if (!(*x == opening_pos[0] && y == opening_pos[1]) || is_opening_open(display, timer)) {
+        update_sand(display, *x, y, rotation);
       }
     }
+  }
+}
+
+void randomize_updates(int *positions) {
+  for (int i = 0; i < 64; i++) {
+    int a = random(0, 64);
+    int b = random(0, 64);
+    int temp = positions[a];
+    positions[a] = positions[b];
+    positions[b] = temp;
   }
 }
 
