@@ -42,10 +42,10 @@ void update_timer(Timer *timer) {
   int delta_time = elapsed - timer->last_updated;
   timer->time_remaining -= delta_time;
   timer->sand_timer += delta_time;
-  if (timer->sand_timer >= SAND_TIME) {
-    timer->sand_let_through++;
-    timer->sand_timer = 0;
-  }
+
+  unsigned long change = timer->sand_timer / SAND_TIME;
+  timer->sand_let_through -= change;
+  timer->sand_timer -= SAND_TIME * change;
 
   timer->last_updated = elapsed;
 }
