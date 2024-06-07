@@ -14,12 +14,7 @@
 
 #define swap(a, b) (a ^= b ^= a ^= b)
 
-int opening_pos[4][2] = {
-    {63, 31},
-    {32, 63},
-    {63, 32},
-    {31, 63},
-};
+int opening_pos[2] = {32, 63};
 
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
 
@@ -55,9 +50,10 @@ Timer timer;
 void setup() {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
 
+  display.setRotation(1);
   draw_hourglass(&display);
-  start_timer(&display, &timer, 60);
   display.setTextColor(true);
+  start_timer(&display, &timer, 60);
 }
 
 void loop() {
@@ -73,17 +69,7 @@ bool is_valid(Adafruit_SSD1306 *display, int x, int y) {
     return false;
   }
 
-  int width = display->width();
-  int height = display->height();
-  if (display->getRotation() / 2) {
-    x = display->width() - x - 1;
-  }
-  if (!(display->getRotation() % 2)) {
-    swap(x, y);
-    swap(width, height);
-  }
-
-  int index = y * width + x;
+  int index = y * display->width() + x;
   return !((pgm_read_byte(&(bitmap_valid_pixels[index / 8])) << (index % 8)) &
            0x80);
 }
@@ -94,7 +80,7 @@ void draw_hourglass(Adafruit_SSD1306 *display) {
 }
 
 void fill_hourglass(Adafruit_SSD1306 *display, int sand_count) {
-  for (int y = 63; y >= 0; y--) {
+  for (int y = display->height() / 2 - 1; y >= 0; y--) {
     for (int x = display->width(); x >= 0; x--) {
       if (sand_count == 0) {
         return;
@@ -128,12 +114,9 @@ void update_sand(Adafruit_SSD1306 *display, int x, int y) {
 }
 
 void update_sim(Adafruit_SSD1306 *display, Timer *timer) {
-  int rotation = display->getRotation();
-  int opening_x = opening_pos[rotation][0],
-      opening_y = opening_pos[rotation][1];
   for (int y = display->height() - 1; y >= 0; y--) {
     for (int x = display->width() - 1; x >= 0; x--) {
-      if (!(x == opening_x && y == opening_y) ||
+      if (!(x == opening_pos[0] && y == opening_pos[1]) ||
           is_opening_open(display, timer)) {
         update_sand(display, x, y);
       }
@@ -142,18 +125,15 @@ void update_sim(Adafruit_SSD1306 *display, Timer *timer) {
 }
 
 void start_timer(Adafruit_SSD1306 *display, Timer *timer, int seconds) {
-  display->setRotation(1);
-  display->clearDisplay();
   draw_hourglass(display);
 
   create_timer(timer, seconds);
-  fill_hourglass(display, seconds / (SAND_TIME / 1000));
+  fill_hourglass(display, seconds / (SAND_TIME / 1000) + 1);
 }
 
 bool is_opening_open(Adafruit_SSD1306 *display, Timer *timer) {
-  int rotation = display->getRotation();
   bool opening_pixel =
-      display->getPixel(opening_pos[rotation][0], opening_pos[rotation][1]);
+      display->getPixel(opening_pos[0], opening_pos[1]);
   if (!opening_pixel) {
     return true;
   }
