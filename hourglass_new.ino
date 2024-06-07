@@ -1,27 +1,47 @@
 #include "bitmaps.h"
 #include <Adafruit_SSD1306.h>
 
+#define SAND_TIME 2000
+
 #define swap(a, b) (a ^= b ^= a ^= b)
 
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
 
-int timer = 100;
+typedef struct {
+  unsigned long time_remaining;
+  unsigned long last_updated;
+  unsigned long sand_timer;
+  int sand_let_through;
+} Timer;
+
+void create_timer(Timer *timer, int seconds) {
+  timer->time_remaining = seconds * 1000;
+  timer->last_updated = millis();
+  timer->sand_timer = 0;
+  timer->sand_let_through = 0;
+}
+
+void update_timer(Timer *timer) {
+  unsigned long elapsed = millis();
+  timer->last_updated = elapsed;
+  timer->time_remaining -= elapsed;
+  timer->sand_timer += elapsed;
+  if (timer->sand_timer >= SAND_TIME) {
+    timer->sand_let_through++;
+  }
+}
+
+Timer timer;
 
 void setup() {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
-  display.setRotation(1);
 
   draw_hourglass(&display);
-  fill_hourglass(&display, 60);
 }
 
 void loop() {
   update_sim(&display);
-  display.display();
-  if (!timer--) {
-    timer = 100;
-    display.setRotation(display.getRotation() + 1);
-  }
+  update_timer(&timer);
 }
 
 bool is_valid(Adafruit_SSD1306 *display, int x, int y) {
