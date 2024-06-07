@@ -37,10 +37,13 @@ void setup() {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
 
   draw_hourglass(&display);
+  start_timer(&display, &timer, 60);
 }
 
 void loop() {
   update_sim(&display);
+  display.display();
+  
   update_timer(&timer);
 }
 
@@ -109,4 +112,13 @@ void update_sim(Adafruit_SSD1306 *display) {
       update_sand(display, x, y);
     }
   }
+}
+
+void start_timer(Adafruit_SSD1306 *display, Timer *timer, int seconds) {
+  display->setRotation(1);
+  display->clearDisplay();
+  draw_hourglass(display);
+
+  create_timer(timer, seconds);
+  fill_hourglass(display, seconds * (SAND_TIME / 1000));
 }
