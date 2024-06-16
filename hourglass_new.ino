@@ -2,16 +2,11 @@
 #include "timer_draw.h"
 #include <Adafruit_SSD1306.h>
 
-
-
 #define swap(a, b) (a ^= b ^= a ^= b)
 #define OPENING_POS_X 32
 #define OPENING_POS_Y 63
 
-
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
-
-
 
 Timer timer;
 
@@ -95,7 +90,8 @@ void update_sim(Adafruit_SSD1306 *display, Timer *timer, int rotation,
                 int *random_pos) {
   for (int y = display->height() - 1; y >= 0; y--) {
     for (int *x = random_pos; x < random_pos + 64; x++) {
-      if (!(*x == OPENING_POS_X && y == OPENING_POS_Y) || is_opening_open(display, timer)) {
+      if (!(*x == OPENING_POS_X && y == OPENING_POS_Y) ||
+          is_opening_open(display, timer)) {
         update_sand(display, *x, y, rotation);
       }
     }
@@ -132,4 +128,3 @@ bool is_opening_open(Adafruit_SSD1306 *display, Timer *timer) {
 
   return false;
 }
-

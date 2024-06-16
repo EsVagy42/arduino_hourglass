@@ -1,6 +1,5 @@
 #include "timer_draw.h"
 
-
 bool draw_remaining_time(Adafruit_SSD1306 *display, Timer *timer) {
   display->fillRect(MINUTES_DIGIT_POS_X, MINUTES_DIGIT_POS_Y,
                     MINUTES_DIGIT_WIDTH, MINUTES_DIGIT_HEIGHT, false);
