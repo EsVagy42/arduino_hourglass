@@ -94,7 +94,7 @@ void update_sim(Adafruit_SSD1306 *display, Timer *timer, int rotation,
       switch (rotation) {
         case 0:
           update_y = display->height() - y - 1;
-          update_x = x;
+          update_x = *x;
           break;
 
         case 1:
