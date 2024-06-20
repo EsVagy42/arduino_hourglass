@@ -88,11 +88,34 @@ void update_sand(Adafruit_SSD1306 *display, int x, int y, int rotation) {
 
 void update_sim(Adafruit_SSD1306 *display, Timer *timer, int rotation,
                 int *random_pos) {
-  for (int y = display->height() - 1; y >= 0; y--) {
+  for (int y = 0; y < display->height(); y++) {
     for (int *x = random_pos; x < random_pos + 64; x++) {
-      if (!(*x == OPENING_POS_X && y == OPENING_POS_Y) ||
+      int update_x, update_y;
+      switch (rotation) {
+        case 0:
+          update_y = display->height() - y - 1;
+          update_x = x;
+          break;
+
+        case 1:
+          update_y = y / 64 ? *x + 64 : *x;
+          update_x = y % 64;
+          update_x = 64 - update_x - 1;
+          break;
+
+        case 2:
+          update_x = *x;
+          update_y = y;
+          break;
+
+        case 3:
+          update_y = y / 64 ? *x + 64 : *x;
+          update_x = y % 64;
+          break;
+      }
+      if (!(update_x == OPENING_POS_X && update_y == OPENING_POS_Y) ||
           is_opening_open(display, timer)) {
-        update_sand(display, *x, y, rotation);
+        update_sand(display, update_x, update_y, rotation);
       }
     }
   }
