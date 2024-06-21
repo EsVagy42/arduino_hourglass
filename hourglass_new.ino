@@ -1,11 +1,13 @@
 #include "bitmaps.h"
 #include "timer_draw.h"
 #include <Adafruit_SSD1306.h>
+#include <Adafruit_MPU6050_modified.h>
 
 #define swap(a, b) (a ^= b ^= a ^= b)
 #define OPENING_POS_X 32
 #define OPENING_POS_Y 63
 
+Adafruit_MPU6050 gyro;
 Adafruit_SSD1306 display(128, 64, &Wire, -1);
 
 Timer timer;
@@ -29,6 +31,11 @@ void loop() {
   randomize_updates(random_update_pos);
   update_sim(&display, &timer, 0, random_update_pos);
   draw_remaining_time(&display, &timer);
+
+  sensors_event_t acc;
+  gyro.getEvent(&acc);
+  display.setCursor(0, 0);
+
   display.display();
 
   update_timer(&timer);
@@ -65,7 +72,7 @@ void fill_hourglass(Adafruit_SSD1306 *display, int sand_count) {
 }
 
 void update_sand(Adafruit_SSD1306 *display, int x, int y, int rotation) {
-  static int neighs[4][3][2] = {{{0, 1}, {-1, 1}, {1, 1}},
+  static char neighs[4][3][2] = {{{0, 1}, {-1, 1}, {1, 1}},
                                 {{1, 0}, {1, 1}, {1, -1}},
                                 {{0, -1}, {1, -1}, {-1, -1}},
                                 {{-1, 0}, {-1, -1}, {-1, 1}}};
